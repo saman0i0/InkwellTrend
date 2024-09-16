@@ -6,6 +6,7 @@ __pycache__
 # Ignore virtual environment
 venv
 .env
+not.txt
 
 # Ignore build/dist/pip folders 
 build/
