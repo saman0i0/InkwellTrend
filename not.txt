@@ -1,0 +1,60 @@
+import os
+import json
+from datetime import datetime
+import tweepy
+from pytrends.request import TrendReq
+
+# Twitter API v1.1 credentials
+consumer_key = os.getenv("TWITTER_CONSUMER_KEY")
+consumer_secret = os.getenv("TWITTER_CONSUMER_SECRET")
+access_token = os.getenv("TWITTER_ACCESS_TOKEN")
+access_token_secret = os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
+
+# Authenticate with Twitter API v1.1
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+api = tweepy.API(auth)
+
+# Set up Google Trends client
+pytrends = TrendReq(hl='en-US', tz=360)
+
+def get_twitter_trends():
+    try:
+        # Get worldwide trends (1 is the woeid for worldwide)
+        trends = api.get_place_trends(1)
+        return [{"name": trend['name'], "tweet_volume": trend['tweet_volume']} for trend in trends[0]['trends']]
+    except Exception as e:
+        print(f"Error getting Twitter trends: {e}")
+        return []
+
+def get_google_trends():
+    try:
+        # Get real-time trending searches
+        trending_searches = pytrends.trending_searches(pn='united_states')
+        return [{"name": trend, "search_volume": None} for trend in trending_searches.values.flatten()]
+    except Exception as e:
+        print(f"Error getting Google trends: {e}")
+        return []
+
+def collect_and_store_trends():
+    try:
+        twitter_trends = get_twitter_trends()
+        google_trends = get_google_trends()
+        
+        # Create a data object with timestamp
+        data = {
+            "timestamp": datetime.now().isoformat(),
+            "twitter_trends": twitter_trends,
+            "google_trends": google_trends
+        }
+        
+        # Store in JSON file
+        with open("trends_data.json", "w") as f:
+            json.dump(data, f, indent=2)
+        
+        print("Trends collected and stored successfully.")
+    except Exception as e:
+        print(f"Error collecting trends: {e}")
+
+if __name__ == "__main__":
+    collect_and_store_trends()

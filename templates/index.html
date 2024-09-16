@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inkwell Trend</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <a href="#" class="logo">Inkwell Trend Based Newsletter Generator</a>
+            <div class="info">
+                <h3>Latest Trends From Socials</h3>
+            </div>
+            <div class="actions">
+                <button class="receive-reminders">Receive email reminders</button>
+            </div>
+        </div>
+    </header>
+    <div class="content-container">
+        <h1>Generate Newsletter</h1>
+        <form method="POST">
+            <label for="country">Select Country:</label>
+            <div class="select-wrapper">
+                <select id="country" name="country">
+                    {% for country in COUNTRIES %}
+                    <option value="{{ country }}" {% if country==selected_country %}selected{% endif %}>
+                        {{ country.replace('_', ' ').title() }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <label for="model">Select Model:</label>
+            <div class="select-wrapper">
+                <select id="model" name="model">
+                    {% for model in GEMINI_MODELS %}
+                    <option value="{{ model }}" {% if model==selected_model %}selected{% endif %}>
+                        {{ model }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type=" submit">Refresh Trends and Generate Newsletter</button>
+        </form>
+        {% if content %}
+        <h2>Generated Newsletter:</h2>
+        <div class="content">
+            {{ content | safe }}
+        </div>
+        {% endif %}
+    </div>
+    <footer>
+        <div class="container">
+            <a href="#" class="support-link">Support us, buy us a coffee.</a>
+        </div>
+    </footer>
+</body>
+
+</html>
