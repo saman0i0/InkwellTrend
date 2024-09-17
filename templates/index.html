@@ -45,12 +45,18 @@
             </div>
             <button type=" submit">Refresh Trends and Generate Newsletter</button>
         </form>
-        {% if content %}
+
+        {% if error_message %}
+        <div class="flash-error">{{ error_message }}</div>
+        {% elif content %}
         <h2>Generated Newsletter:</h2>
         <div class="content">
             {{ content | safe }}
         </div>
+        {% else %}
+        <p>No content generated. Please try selecting a country and generating content.</p>
         {% endif %}
+
     </div>
     <footer>
         <div class="container">

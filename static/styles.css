@@ -154,6 +154,28 @@ button:hover {
     background-color: #2980b9; /* Darker blue on hover */
 }
 
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+  }
+  
+  .flash-error {
+    background-color: #ffdddd;
+    border: 1px solid #ff8888;
+    padding: 8px 12px;
+    margin-bottom: 5px; 
+    border-radius: 5px;
+  }
+  
+  .flash-success {
+    background-color: #ddffdd;
+    border: 1px solid #88ff88;
+    padding: 8px 12px;
+    margin-bottom: 5px; 
+    border-radius: 5px;
+  }
+
 .content {
     background-color: #fff; /* White for content box */
     padding: 20px;
@@ -162,7 +184,7 @@ button:hover {
 }
 .content h1 { font-size: 24px; font-weight: bold; margin-top: 20px; }
 .content h2 { font-size: 20px; font-weight: bold; margin-top: 15px; }
-.content p { margin-bottom: 10px; }
+.content p { margin-bottom: 10px; line-height: 1.6; }
 .content ul, .content ol { margin-left: 20px; margin-bottom: 10px; }
 
 footer {

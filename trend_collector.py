@@ -26,16 +26,6 @@ client = tweepy.Client(bearer_token=bearer_token)
 # Set up Google Trends client
 pytrends = TrendReq(hl='en-US', tz=360)
 
-def get_twitter_trends():
-    try:
-        # Get worldwide trends (1 is the woeid for worldwide)
-        response = client.get_place_trends(woeid=1)
-        trends = response.data[0]
-        return [{"name": trend['name'], "tweet_volume": trend['tweet_volume']} for trend in trends]
-    except Exception as e:
-        print(f"Error getting Twitter trends: {e}")
-        return []
-
 COUNTRIES = [
     'afghanistan', 'albania', 'algeria', 'andorra', 'angola', 'antigua_and_barbuda', 'argentina', 'armenia', 'australia', 'austria', 
     'azerbaijan', 'bahamas', 'bahrain', 'bangladesh', 'barbados', 'belarus', 'belgium', 'belize', 'benin', 'bhutan', 
@@ -59,37 +49,44 @@ COUNTRIES = [
     'vatican_city', 'venezuela', 'vietnam', 'yemen', 'zambia', 'zimbabwe'
 ]
 
+def get_twitter_trends():
+    try:
+        response = api.get_place_trends(1)
+        trends = response.data[0]
+        return [{"name": trend['name'], "tweet_volume": trend['tweet_volume']} for trend in trends]
+    except Exception as e:
+        print(f"Error getting Twitter trends: {e}")
+        return []
+
 def get_google_trends(country):
     try:
-        # Get real-time trending searches
         if country not in COUNTRIES:
-            country = 'united_states'  # Default to 'united_states' if country not found
+            country = 'united_states'
         trending_searches = pytrends.trending_searches(pn=country)
         return [{"name": trend, "search_volume": None} for trend in trending_searches.values.flatten()]
     except Exception as e:
-        print(f"Error getting Google trends {country}: {e}")
+        print(f"Error getting Google trends for {country}: {e}")
         return []
 
 def collect_and_store_trends(country_code):
-    try:
-        twitter_trends = get_twitter_trends()
-        google_trends = get_google_trends(country_code)
-        
-        # Create a data object with timestamp
-        data = {
-            "timestamp": datetime.now().isoformat(),
-            "country_code": country_code,
-            "twitter_trends": twitter_trends,
-            "google_trends": google_trends
-        }
-        
-        # Store in JSON file
-        with open("trends_data.json", "w") as f:
-            json.dump(data, f, indent=2)
-        
-        print("Trends collected and stored successfully.")
-    except Exception as e:
-        print(f"Error collecting trends: {e}")
+    twitter_trends = get_twitter_trends()
+    google_trends = get_google_trends(country_code)
+    
+    if not twitter_trends and not google_trends:
+        raise Exception("No trend data available for the selected country")
+    
+    data = {
+        "timestamp": datetime.now().isoformat(),
+        "country_code": country_code,
+        "twitter_trends": twitter_trends,
+        "google_trends": google_trends
+    }
+    
+    with open("trends_data.json", "w") as f:
+        json.dump(data, f, indent=2)
+    
+    print("Trends collected and stored successfully.")
+    return data
 
 if __name__ == "__main__":
-    collect_and_store_trends()
+    collect_and_store_trends('united_states')
