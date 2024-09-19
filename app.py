@@ -45,30 +45,25 @@ def index():
             twitter_trends = data["twitter_trends"]
             google_trends = data["google_trends"]
             reddit_trends = data["reddit_trends"]
+        
+            # Combine all trends and select top 5 based on volume/score
+            combined_trends = (
+                sorted(twitter_trends, key=lambda x: x.get('tweet_volume', 0) or 0, reverse=True) +
+                sorted(google_trends, key=lambda x: x.get('search_volume', 0) or 0, reverse=True) +
+                sorted(reddit_trends, key=lambda x: x.get('score', 0) or 0, reverse=True)
+            )
+            top_trends = combined_trends[:5]
+
+            if top_trends:
+                try:
+                    content = generate_newsletter_content(top_trends[:5], selected_country, selected_model, tone, keywords)
+                except Exception as e:
+                    error_message = f"Error generating newsletter content: {str(e)}"
+            else:
+                error_message = "No trends available to generate content. Please try another country or try again later."
+        
         except Exception as e:
             error_message = f"Error: Could not retrieve trends for {selected_country}. {str(e)}"
-    else:
-        try:
-            twitter_trends, google_trends, reddit_trends, stored_country = get_latest_trends()
-            selected_country = stored_country if stored_country else selected_country
-        except Exception as e:
-            error_message = f"Error: Could not load stored trends. {str(e)}"
-
-    # Combine all trends and select top 5 based on volume/score
-    combined_trends = (
-        sorted(twitter_trends, key=lambda x: x.get('tweet_volume', 0) or 0, reverse=True) +
-        sorted(google_trends, key=lambda x: x.get('search_volume', 0) or 0, reverse=True) +
-        sorted(reddit_trends, key=lambda x: x.get('score', 0) or 0, reverse=True)
-    )
-    top_trends = combined_trends[:5]
-
-    if top_trends:
-        try:
-            content = generate_newsletter_content(top_trends[:25], selected_country, selected_model, tone, keywords)
-        except Exception as e:
-            error_message = f"Error generating newsletter content: {str(e)}"
-    else:
-        error_message = "No trends available to generate content. Please try another country or try again later."
 
     if error_message:
         flash(error_message, 'error')
@@ -80,22 +75,37 @@ def index():
 def generate_newsletter_content(trends, country_code, selected_model, keywords="", tone="Informative"):
     trend_names = ", ".join([trend["name"] for trend in trends])
     model = genai.GenerativeModel(selected_model)
+
+    # Tone Instruction Mapping: 
+    tone_instructions = {
+        "Informative": "Provide a neutral and informative tone suitable for a general audience.",
+        "Humorous": "Incorporate humor and a lighthearted tone in the writing.",
+        "Formal": "Use a professional and formal tone suitable for a news report.",
+        "Casual": "Write with a casual, conversational, and friendly tone, as if talking to a friend."
+    } 
+    # Get the tone instruction or default to "Informative"
+    tone_instruction = tone_instructions.get(tone, tone_instructions["Informative"])
+
     prompt = f"""Generate a newsletter section about these trends: {trend_names}.
         Consider these keywords: {keywords}.
-        Write in a {tone} tone. 
-        Output Format:
-        1. Main Headline:
-        [Create a catchy main headline that combines the top three trends]
-        For each trend, provide the following on separate lines:
-        2. Trend Sections:
-        For each trend, provide:
-        - Trend Headline: [Catchy headline for the specific trend]
-        - Overview: [Brief description of the trend, its significance, impact, and any notable events. Aim for about 200-350 words per trend.]
-        Please ensure each trend is clearly separated with its own headline and overview. Make headline more than just name of the trend be creative.
+        {tone_instruction}
+        - Main Headline: 
+          [Create a catchy main headline that creatively combines the top three trends. Keep it under 100 words.]
+        - Trend Sections:
+          For each trend, provide: 
+            Trend Headline:
+            [Write a catchy and creative headline about the trend, without explicitly using the trend's name. Keep it brief.] 
+            Overview:
+            [Provide a detailed overview of the trend, highlighting its significance, impact, and any recent events, in about 200-350 words.]
+        Please ensure each trend is clearly separated with its own headline and overview.
         Do not include following on the output 
-        - Use of word headline
-        - Any additional subheadings or sections beyond what is specified above."""
-    
+        - Use of word trend headline, overview.
+        - Any additional subheadings or sections beyond what is specified above.
+        """ 
+
+    for i, trend in enumerate(trends): 
+        prompt += f"\n\nTrend {i+1}: {trend['name']}\n"  
+        
     print(f"Generating content for trends in {country_code}: {trend_names}")
     response = model.generate_content(prompt)
         

@@ -26,6 +26,11 @@ header {
     padding: 20px 0;
     text-align: center;
 }
+.infos p{
+    text-decoration: none;
+    font-size: 1.5em;
+    color: #fff;
+}
 
 .logo {
     display: inline-block;
@@ -52,10 +57,9 @@ h2 {
 }
 
 h3 {
-    margin: 10px 0;
-    color: #fff; 
-    font-weight: normal;
-    font-size: 1.1em;
+    color: #333333; ; 
+    font-weight: bold;
+    font-size: 1.3em;
     display: inline-block;
 }
 p {
@@ -162,31 +166,31 @@ button:hover {
     border-radius: 5px;
 }
 
-.content {
+.newsletter {
     background-color: #fff; /* White for content box */
     padding: 20px;
     border-radius: 5px;
     box-shadow: 2px 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.content h1 { 
+.newsletter h1 { 
     font-size: 24px; 
     font-weight: bold; 
     margin-top: 20px; 
 }
 
-.content h2 { 
+.newsletter h2 { 
     font-size: 20px; 
     font-weight: bold; 
     margin-top: 15px; 
 }
 
-.content p { 
+.newsletter p { 
     margin-bottom: 10px; 
     line-height: 1.6; 
 }
 
-.content ul, .content ol { 
+.newsletter ul, .newsletter ol { 
     margin-left: 20px; 
     margin-bottom: 10px; 
 }
@@ -236,6 +240,10 @@ footer {
     opacity: 0.8;           /* Slightly darker on hover */
   }
   
-  #feedback button:nth-child(2) { /* Style for the "Bad" button */
-    background-color: #f44336; /* Red for "Bad" button */ 
+  #feedback button:first-child { /* Style for the "Good" button */
+    background-color: #4CAF50; /* Green */
   }
+  
+#feedback button:last-child { /* Style for the "Bad" button */
+    background-color: #f44336; /* Red  */
+}

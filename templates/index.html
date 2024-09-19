@@ -6,14 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inkwell Trend</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 
 <body>
     <header>
         <div class="container">
             <a href="#" class="logo">Inkwell Trend Based Newsletter Generator</a>
-            <div class="info">
-                <h3>Latest Trends From Socials</h3>
+            <div class="infos">
+                <p>Latest Trends From Socials</p>
             </div>
             <div class="actions">
                 <button class="receive-reminders">Receive email reminders</button>
@@ -68,23 +70,14 @@
         <div class="flash-error">{{ error_message }}</div>
         {% elif content %}
         <h2>Generated Newsletter:</h2>
-        <div class="content">
+        <div class="newsletter" id="newsletterToCopy">
             {{ content | safe }}
         </div>
-        {% else %}
-        <p>No content generated. Please try selecting a country and generating content.</p>
         {% endif %}
+        <button class="btn" data-clipboard-target="#newsletterToCopy" style="display:none;">
+            Copy to Clipboard
+        </button>
 
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        {% if category == 'show_feedback' %}
-        <script>showFeedback();</script>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
         <div id="feedback">
             <p>Help us improve. How was the output?</p>
             <button onclick="feedback('good')">Good</button>
@@ -98,21 +91,5 @@
         </div>
     </footer>
 </body>
-
-<script>
-    function showFeedback() {
-        var feedbackDiv = document.getElementById("feedback");
-        feedbackDiv.style.display = "block";
-    }
-
-    function feedback(quality) {
-        var feedbackDiv = document.getElementById("feedback");
-        var thankYouMessage = document.createElement("p");
-        thankYouMessage.textContent = "Thank you for your feedback!";
-
-        feedbackDiv.innerHTML = "";
-        feedbackDiv.appendChild(thankYouMessage);
-    }
-</script>
 
 </html>

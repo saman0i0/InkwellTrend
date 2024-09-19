@@ -90,7 +90,7 @@ def get_google_trends(country):
 def get_reddit_trends():
     try:
         reddit = praw.Reddit(
-            client_id=os.getenv("REDDIT_CLIENT_ID"),
+            client_id=os.getenv("REDDIT_CLIENT_IDs"),
             client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
             user_agent=os.getenv("REDDIT_USER_AGENT")
         )
