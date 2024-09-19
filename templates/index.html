@@ -33,6 +33,19 @@
                     {% endfor %}
                 </select>
             </div>
+
+            <!-- Tone select -->
+            <label for="tone">Select Tone:</label>
+            <div class="select-wrapper">
+                <select id="tone" name="tone">
+                    <option value="Informative">Informative</option>
+                    <option value="Formal">Formal</option>
+                    <option value="Casual">Casual</option>
+                    <option value="Humorous">Humorous</option>
+                    <!-- Add more tone options as needed -->
+                </select>
+            </div>
+
             <label for="model">Select Model:</label>
             <div class="select-wrapper">
                 <select id="model" name="model">
@@ -43,7 +56,12 @@
                     {% endfor %}
                 </select>
             </div>
-            <button type=" submit">Refresh Trends and Generate Newsletter</button>
+
+            <!-- Keywords input -->
+            <label for="keywords">What keywords do you want to include? (optional)</label>
+            <input type="text" id="keywords" name="keywords"><br><br>
+
+            <button type="submit">✨ Generate Newsletter</button>
         </form>
 
         {% if error_message %}
@@ -57,12 +75,44 @@
         <p>No content generated. Please try selecting a country and generating content.</p>
         {% endif %}
 
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        {% if category == 'show_feedback' %}
+        <script>showFeedback();</script>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div id="feedback">
+            <p>Help us improve. How was the output?</p>
+            <button onclick="feedback('good')">Good</button>
+            <button onclick="feedback('bad')">Bad</button>
+        </div>
     </div>
+
     <footer>
         <div class="container">
             <a href="#" class="support-link">Support us, buy us a coffee.</a>
         </div>
     </footer>
 </body>
+
+<script>
+    function showFeedback() {
+        var feedbackDiv = document.getElementById("feedback");
+        feedbackDiv.style.display = "block";
+    }
+
+    function feedback(quality) {
+        var feedbackDiv = document.getElementById("feedback");
+        var thankYouMessage = document.createElement("p");
+        thankYouMessage.textContent = "Thank you for your feedback!";
+
+        feedbackDiv.innerHTML = "";
+        feedbackDiv.appendChild(thankYouMessage);
+    }
+</script>
 
 </html>

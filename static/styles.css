@@ -124,20 +124,6 @@ select:focus {
     border-color: #4a4a4a;
 }
 
-/* button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    background-color: #3d3d3d;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #4a4a4a;
-} */
-
 button {
     background-color: #3498db; /*  Mid-blue for button */
     color: #fff; 
@@ -158,23 +144,23 @@ button:hover {
     list-style: none;
     padding: 0;
     margin: 10px 0;
-  }
+}
   
-  .flash-error {
+.flash-error {
     background-color: #ffdddd;
     border: 1px solid #ff8888;
     padding: 8px 12px;
     margin-bottom: 5px; 
     border-radius: 5px;
-  }
+}
   
-  .flash-success {
+.flash-success {
     background-color: #ddffdd;
     border: 1px solid #88ff88;
     padding: 8px 12px;
     margin-bottom: 5px; 
     border-radius: 5px;
-  }
+}
 
 .content {
     background-color: #fff; /* White for content box */
@@ -182,10 +168,28 @@ button:hover {
     border-radius: 5px;
     box-shadow: 2px 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
-.content h1 { font-size: 24px; font-weight: bold; margin-top: 20px; }
-.content h2 { font-size: 20px; font-weight: bold; margin-top: 15px; }
-.content p { margin-bottom: 10px; line-height: 1.6; }
-.content ul, .content ol { margin-left: 20px; margin-bottom: 10px; }
+
+.content h1 { 
+    font-size: 24px; 
+    font-weight: bold; 
+    margin-top: 20px; 
+}
+
+.content h2 { 
+    font-size: 20px; 
+    font-weight: bold; 
+    margin-top: 15px; 
+}
+
+.content p { 
+    margin-bottom: 10px; 
+    line-height: 1.6; 
+}
+
+.content ul, .content ol { 
+    margin-left: 20px; 
+    margin-bottom: 10px; 
+}
 
 footer {
     background-color: #18B7BE; /* Teal for footer */
@@ -202,3 +206,36 @@ footer {
     font-size: 1.1em;
 }
 
+/* Add these rules to your styles.css file */
+
+#feedback {
+    display: none;
+    background-color: #f8f8f8;  /* Light grey background */
+    border: 1px solid #ddd;      /* Subtle grey border */
+    padding: 20px;             /* Some padding inside */
+    border-radius: 5px;         /* Rounded corners */
+    margin-top: 20px;
+  }
+  
+  #feedback p {
+    font-weight: bold;        /* Make the question text stand out */
+    margin-bottom: 10px;       /* Add spacing below the question */
+  }
+  
+  #feedback button {
+    background-color: #4CAF50; /* Green for "Good" button */
+    color: white;              /* White text */
+    padding: 10px 20px;        /* Some button padding */
+    border: none;             /* No button border */
+    border-radius: 5px;         /* Rounded corners */
+    margin: 0 5px;            /* Spacing between the buttons */
+    cursor: pointer;            /* Change the mouse cursor on hover */
+  }
+  
+  #feedback button:hover {
+    opacity: 0.8;           /* Slightly darker on hover */
+  }
+  
+  #feedback button:nth-child(2) { /* Style for the "Bad" button */
+    background-color: #f44336; /* Red for "Bad" button */ 
+  }

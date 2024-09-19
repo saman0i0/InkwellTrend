@@ -1,22 +1,9 @@
 # Ignore Python cache files
 __pycache__
-*.pyc
-*.pyo
 
 # Ignore virtual environment
 venv
 .env
-not.txt
-
-# Ignore build/dist/pip folders 
-build/
-dist/
-pip-wheel-metadata/
-
-# Ignore potential local settings
-config.py
-secrets.py
-local_settings.py
 
 # Ignore specific files or folders
 trends_data.json 

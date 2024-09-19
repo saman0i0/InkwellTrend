@@ -19,16 +19,17 @@ def get_latest_trends():
     try:
         with open("trends_data.json", "r") as f:
             data = json.load(f)
-        return data["twitter_trends"], data["google_trends"],  data.get("country_code", "united_states"), data.get("errors", [])
+        return data["twitter_trends"], data["google_trends"], data["reddit_trends"], data.get("country_code", "united_states"), data.get("errors", [])
     except (FileNotFoundError, json.JSONDecodeError) as e:
         flash(f"Error: Unable to retrieve trends data. ({e})", 'error')
-        return [], [], "united_states", [] # Return empty lists to avoid issues # Handle JSON decoding issues
+        return [], [], [], "united_states", [] # Return empty lists to avoid issues # Handle JSON decoding issues
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     content = ""
     twitter_trends = []
     google_trends = []
+    reddit_trends = []
     selected_country = "united_states"
     selected_model = "gemini-1.5-flash"
     error_message = None
@@ -36,44 +37,52 @@ def index():
     if request.method == 'POST':
         selected_country = request.form.get('country')
         selected_model = request.form.get('model', 'gemini-1.5-flash')
+        keywords = request.form.get('keywords') 
+        tone = request.form.get('tone', 'Informative') 
         
         try:
             data = collect_and_store_trends(selected_country)
             twitter_trends = data["twitter_trends"]
             google_trends = data["google_trends"]
+            reddit_trends = data["reddit_trends"]
         except Exception as e:
             error_message = f"Error: Could not retrieve trends for {selected_country}. {str(e)}"
     else:
         try:
-            twitter_trends, google_trends, stored_country = get_latest_trends()
+            twitter_trends, google_trends, reddit_trends, stored_country = get_latest_trends()
             selected_country = stored_country if stored_country else selected_country
         except Exception as e:
             error_message = f"Error: Could not load stored trends. {str(e)}"
 
-    combined_trends = twitter_trends + google_trends
+    # Combine all trends and select top 5 based on volume/score
+    combined_trends = (
+        sorted(twitter_trends, key=lambda x: x.get('tweet_volume', 0) or 0, reverse=True) +
+        sorted(google_trends, key=lambda x: x.get('search_volume', 0) or 0, reverse=True) +
+        sorted(reddit_trends, key=lambda x: x.get('score', 0) or 0, reverse=True)
+    )
+    top_trends = combined_trends[:5]
 
-    if combined_trends:
+    if top_trends:
         try:
-            content = generate_newsletter_content(combined_trends[:5], selected_country, selected_model)
+            content = generate_newsletter_content(top_trends[:25], selected_country, selected_model, tone, keywords)
         except Exception as e:
             error_message = f"Error generating newsletter content: {str(e)}"
     else:
-        error_message = "No trend data available. Please try another country or try again later."
+        error_message = "No trends available to generate content. Please try another country or try again later."
 
     if error_message:
         flash(error_message, 'error')
 
     return render_template('index.html', content=content, twitter_trends=twitter_trends, google_trends=google_trends, 
-                           selected_country=selected_country, COUNTRIES=COUNTRIES, 
+                           reddit_trends=reddit_trends, selected_country=selected_country, COUNTRIES=COUNTRIES, 
                            selected_model=selected_model, GEMINI_MODELS=GEMINI_MODELS, error_message=error_message)
 
-def generate_newsletter_content(trends, country_code, selected_model):
-    if not trends:
-        raise ValueError("No trends available to generate content")
-    
+def generate_newsletter_content(trends, country_code, selected_model, keywords="", tone="Informative"):
     trend_names = ", ".join([trend["name"] for trend in trends])
     model = genai.GenerativeModel(selected_model)
-    prompt = f"""Generate a newsletter section about these trends: {trend_names}. 
+    prompt = f"""Generate a newsletter section about these trends: {trend_names}.
+        Consider these keywords: {keywords}.
+        Write in a {tone} tone. 
         Output Format:
         1. Main Headline:
         [Create a catchy main headline that combines the top three trends]

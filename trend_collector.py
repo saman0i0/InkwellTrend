@@ -2,6 +2,9 @@ import os, json, tweepy, pytrends
 from datetime import datetime
 from dotenv import load_dotenv
 from pytrends.request import TrendReq
+from tweepy.errors import Unauthorized, TooManyRequests
+from tenacity import retry, stop_after_attempt, wait_fixed
+import praw
 # Load environment variables
 load_dotenv()
 
@@ -24,7 +27,7 @@ bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
 client = tweepy.Client(bearer_token=bearer_token)
 
 # Set up Google Trends client
-pytrends = TrendReq(hl='en-US', tz=360)
+pytrends = TrendReq(hl='en-US', tz=360, timeout=(10, 25))
 
 COUNTRIES = [
     'afghanistan', 'albania', 'algeria', 'andorra', 'angola', 'antigua_and_barbuda', 'argentina', 'armenia', 'australia', 'austria', 
@@ -51,13 +54,29 @@ COUNTRIES = [
 
 def get_twitter_trends():
     try:
-        response = api.get_place_trends(1)
+        response = client.get_place_trends(1)
         trends = response.data[0]
-        return [{"name": trend['name'], "tweet_volume": trend['tweet_volume']} for trend in trends]
+        if response.data:
+            return [{"name": trend['name'], "tweet_volume": trend['tweet_volume']} for trend in trends]
+        else:
+            print("No Twitter trends found")
+            return []
+    # except tweepy.TweepError as e:
+    #     print(f"Twitter API Error: {e}")
+    #     return []
+    # except Unauthorized as e:
+    #     print(f"Twitter API authentication failed: {e}")
+    #     # Log this error or notify yourself to check the tokens
+    #     return []
+    # except TooManyRequests as e:
+    #     print(f"Twitter API rate limit exceeded: {e}")
+    #     # Implement a backoff strategy or wait before retrying
+    #     return []
     except Exception as e:
         print(f"Error getting Twitter trends: {e}")
         return []
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def get_google_trends(country):
     try:
         if country not in COUNTRIES:
@@ -68,9 +87,36 @@ def get_google_trends(country):
         print(f"Error getting Google trends for {country}: {e}")
         return []
 
+def get_reddit_trends():
+    try:
+        reddit = praw.Reddit(
+            client_id=os.getenv("REDDIT_CLIENT_ID"),
+            client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
+            user_agent=os.getenv("REDDIT_USER_AGENT")
+        )
+        
+        # trending_subreddits = reddit.trending_subreddits()
+        popular_posts = reddit.subreddit("all").hot(limit=10)
+        
+        trends = []
+        # for subreddit in trending_subreddits:
+        #     trends.append({"name": f"r/{subreddit}", "type": "subreddit"})
+        
+        for post in popular_posts:
+            trends.append({"name": post.title, "type": "post", "score": post.score, "subreddit": post.subreddit.display_name})
+        
+        # Sort trends by score and take top 10
+        trends = sorted(trends, key=lambda x: x['score'], reverse=True)[:5]
+
+        return trends
+    except Exception as e:
+        print(f"Error getting Reddit trends: {e}")
+        return []
+
 def collect_and_store_trends(country_code):
     twitter_trends = get_twitter_trends()
     google_trends = get_google_trends(country_code)
+    reddit_trends = get_reddit_trends()
     
     if not twitter_trends and not google_trends:
         raise Exception("No trend data available for the selected country")
@@ -79,7 +125,8 @@ def collect_and_store_trends(country_code):
         "timestamp": datetime.now().isoformat(),
         "country_code": country_code,
         "twitter_trends": twitter_trends,
-        "google_trends": google_trends
+        "google_trends": google_trends,
+        "reddit_trends": reddit_trends
     }
     
     with open("trends_data.json", "w") as f:
