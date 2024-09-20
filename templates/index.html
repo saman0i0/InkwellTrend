@@ -5,26 +5,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inkwell Trend</title>
+    <!-- Link to favicon and stylesheets -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Load ClipboardJS and external script -->
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 
 <body>
+    <!-- Header section with logo and brief info -->
     <header>
         <div class="container">
             <a href="#" class="logo">Inkwell Trend Based Newsletter Generator</a>
             <div class="infos">
                 <p>Latest Trends From Socials</p>
             </div>
-            <div class="actions">
-                <button class="receive-reminders">Receive email reminders</button>
-            </div>
         </div>
     </header>
+
+    <!-- Main content section for generating newsletter -->
     <div class="content-container">
         <h1>Generate Newsletter</h1>
+
+        <!-- Form for selecting country, tone, number of trends, and model -->
         <form method="POST">
+            <!-- Dropdown to select country -->
             <label for="country">Select Country:</label>
             <div class="select-wrapper">
                 <select id="country" name="country">
@@ -36,7 +42,7 @@
                 </select>
             </div>
 
-            <!-- Tone select -->
+            <!-- Dropdown to select tone of newsletter -->
             <label for="tone">Select Tone:</label>
             <div class="select-wrapper">
                 <select id="tone" name="tone">
@@ -44,10 +50,20 @@
                     <option value="Formal">Formal</option>
                     <option value="Casual">Casual</option>
                     <option value="Humorous">Humorous</option>
-                    <!-- Add more tone options as needed -->
                 </select>
             </div>
 
+            <!-- Dropdown to select the number of trends -->
+            <label for="num_trends">Number of Trends:</label>
+            <div class="select-wrapper">
+                <select id="num_trends" name="num_trends">
+                    <option value="5" {% if num_trends==5 %}selected{% endif %}>Top 5</option>
+                    <option value="10" {% if num_trends==10 %}selected{% endif %}>Top 10</option>
+                    <option value="15" {% if num_trends==15 %}selected{% endif %}>Top 15</option>
+                </select>
+            </div>
+
+            <!-- Dropdown to select which AI model to use -->
             <label for="model">Select Model:</label>
             <div class="select-wrapper">
                 <select id="model" name="model">
@@ -59,25 +75,35 @@
                 </select>
             </div>
 
-            <!-- Keywords input -->
+            <!-- Input for additional keywords (optional) -->
             <label for="keywords">What keywords do you want to include? (optional)</label>
             <input type="text" id="keywords" name="keywords"><br><br>
 
-            <button type="submit">✨ Generate Newsletter</button>
+            <!-- Hidden field to store the source of trends -->
+            <input type="hidden" id="source" name="source" value="">
+
+            <!-- Buttons to generate newsletter from either Google Trends or Reddit -->
+            <button type="submit" onclick="setSource('google')">✨ Generate from Google Trends</button>
+            <button type="submit" onclick="setSource('reddit')">✨ Generate from Reddit</button>
         </form>
 
+        <!-- Error message display if any -->
         {% if error_message %}
         <div class="flash-error">{{ error_message }}</div>
-        {% elif content %}
+        {% endif %}
+
+        <!-- Display generated newsletter and copy to clipboard button -->
+        {% if content %}
         <h2>Generated Newsletter:</h2>
         <div class="newsletter" id="newsletterToCopy">
             {{ content | safe }}
         </div>
-        {% endif %}
         <button class="btn" data-clipboard-target="#newsletterToCopy" style="display:none;">
             Copy to Clipboard
         </button>
+        {% endif %}
 
+        <!-- Feedback section for users to rate the output -->
         <div id="feedback">
             <p>Help us improve. How was the output?</p>
             <button onclick="feedback('good')">Good</button>
@@ -85,6 +111,7 @@
         </div>
     </div>
 
+    <!-- Footer with support link -->
     <footer>
         <div class="container">
             <a href="#" class="support-link">Support us, buy us a coffee.</a>

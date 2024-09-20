@@ -1,138 +1,132 @@
-import os, json, tweepy, pytrends
+# Import necessary libraries
+import os, json, pytrends
 from datetime import datetime
 from dotenv import load_dotenv
 from pytrends.request import TrendReq
-from tweepy.errors import Unauthorized, TooManyRequests
 from tenacity import retry, stop_after_attempt, wait_fixed
 import praw
-# Load environment variables
+
+# Load environment variables from a .env file (contains API keys)
 load_dotenv()
 
-# Twitter API credentials
-consumer_key = os.getenv("TWITTER_API_KEY")
-consumer_secret = os.getenv("TWITTER_API_SECRET")
-access_token = os.getenv("TWITTER_ACCESS_TOKEN")
-access_token_secret = os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
-
-# Authenticate with Twitter API
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
-api = tweepy.API(auth)
-
-
-# Twitter API v2 credentials
-bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
-
-# Authenticate with Twitter API v2
-client = tweepy.Client(bearer_token=bearer_token)
+# Set up Reddit API client using credentials from the environment variables
+reddit = praw.Reddit(
+    client_id=os.getenv("REDDIT_CLIENT_ID"),
+    client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
+    user_agent=os.getenv("REDDIT_USER_AGENT")
+)
 
 # Set up Google Trends client
+# `hl` sets the language (en-US for English), and `tz` is the timezone (360 for UTC+6)
 pytrends = TrendReq(hl='en-US', tz=360, timeout=(10, 25))
 
+# List of country codes for Google Trends data (in snake_case format)
 COUNTRIES = [
-    'afghanistan', 'albania', 'algeria', 'andorra', 'angola', 'antigua_and_barbuda', 'argentina', 'armenia', 'australia', 'austria', 
-    'azerbaijan', 'bahamas', 'bahrain', 'bangladesh', 'barbados', 'belarus', 'belgium', 'belize', 'benin', 'bhutan', 
-    'bolivia', 'bosnia_and_herzegovina', 'botswana', 'brazil', 'brunei', 'bulgaria', 'burkina_faso', 'burundi', 'cambodia', 'cameroon', 
-    'canada', 'cape_verde', 'central_african_republic', 'chad', 'chile', 'china', 'colombia', 'comoros', 'congo', 'costa_rica', 
-    'croatia', 'cuba', 'cyprus', 'czech_republic', 'denmark', 'djibouti', 'dominica', 'dominican_republic', 'east_timor', 'ecuador', 
-    'egypt', 'el_salvador', 'equatorial_guinea', 'eritrea', 'estonia', 'ethiopia', 'fiji', 'finland', 'france', 'gabon', 
-    'gambia', 'georgia', 'germany', 'ghana', 'greece', 'grenada', 'guatemala', 'guinea', 'guinea_bissau', 'guyana', 
-    'haiti', 'honduras', 'hong_kong', 'hungary', 'iceland', 'india', 'indonesia', 'iran', 'iraq', 'ireland', 
-    'israel', 'italy', 'ivory_coast', 'jamaica', 'japan', 'jordan', 'kazakhstan', 'kenya', 'kiribati', 'kuwait', 
-    'kyrgyzstan', 'laos', 'latvia', 'lebanon', 'lesotho', 'liberia', 'libya', 'liechtenstein', 'lithuania', 'luxembourg', 
-    'madagascar', 'malawi', 'malaysia', 'maldives', 'mali', 'malta', 'marshall_islands', 'mauritania', 'mauritius', 'mexico', 
-    'micronesia', 'moldova', 'monaco', 'mongolia', 'montenegro', 'morocco', 'mozambique', 'myanmar', 'namibia', 'nauru', 
-    'nepal', 'netherlands', 'new_zealand', 'nicaragua', 'niger', 'nigeria', 'north_korea', 'north_macedonia', 'norway', 'oman', 
-    'pakistan', 'palau', 'palestine', 'panama', 'papua_new_guinea', 'paraguay', 'peru', 'philippines', 'poland', 'portugal', 
-    'qatar', 'romania', 'russia', 'rwanda', 'saint_kitts_and_nevis', 'saint_lucia', 'saint_vincent_and_the_grenadines', 'samoa', 'san_marino', 'sao_tome_and_principe', 
-    'saudi_arabia', 'senegal', 'serbia', 'seychelles', 'sierra_leone', 'singapore', 'slovakia', 'slovenia', 'solomon_islands', 'somalia', 
-    'south_africa', 'south_korea', 'south_sudan', 'spain', 'sri_lanka', 'sudan', 'suriname', 'swaziland', 'sweden', 'switzerland', 
-    'syria', 'taiwan', 'tajikistan', 'tanzania', 'thailand', 'togo', 'tonga', 'trinidad_and_tobago', 'tunisia', 'turkey', 
-    'turkmenistan', 'tuvalu', 'uganda', 'ukraine', 'united_arab_emirates', 'united_kingdom', 'united_states', 'uruguay', 'uzbekistan', 'vanuatu', 
-    'vatican_city', 'venezuela', 'vietnam', 'yemen', 'zambia', 'zimbabwe'
+    'argentina', 'australia', 'austria', 'bangladesh', 'belgium', 'brazil', 'canada', 'chile', 'china', 'colombia',
+    'czech_republic', 'denmark', 'egypt', 'ethiopia', 'finland', 'france', 'germany', 'ghana', 'greece', 'hungary',
+    'india', 'indonesia', 'iran', 'iraq', 'ireland', 'israel', 'italy', 'ivory_coast', 'jamaica', 'japan',
+    'kazakhstan', 'kenya', 'malaysia', 'mexico', 'morocco', 'myanmar', 'nepal', 'netherlands', 'new_zealand', 'nigeria',
+    'norway', 'pakistan', 'panama', 'peru', 'philippines', 'poland', 'portugal', 'qatar', 'romania', 'russia',
+    'saudi_arabia', 'senegal', 'serbia', 'singapore', 'south_africa', 'south_korea', 'spain', 'sri_lanka', 'sudan', 'sweden',
+    'switzerland', 'taiwan', 'tanzania', 'thailand', 'tunisia', 'turkey', 'uganda', 'ukraine', 'united_arab_emirates', 'united_kingdom',
+    'united_states', 'uruguay', 'uzbekistan', 'venezuela', 'vietnam', 'zambia', 'zimbabwe'
 ]
 
-def get_twitter_trends():
-    try:
-        response = client.get_place_trends(1)
-        trends = response.data[0]
-        if response.data:
-            return [{"name": trend['name'], "tweet_volume": trend['tweet_volume']} for trend in trends]
-        else:
-            print("No Twitter trends found")
-            return []
-    # except tweepy.TweepError as e:
-    #     print(f"Twitter API Error: {e}")
-    #     return []
-    # except Unauthorized as e:
-    #     print(f"Twitter API authentication failed: {e}")
-    #     # Log this error or notify yourself to check the tokens
-    #     return []
-    # except TooManyRequests as e:
-    #     print(f"Twitter API rate limit exceeded: {e}")
-    #     # Implement a backoff strategy or wait before retrying
-    #     return []
-    except Exception as e:
-        print(f"Error getting Twitter trends: {e}")
-        return []
 
+# Function to fetch Google Trends data for a given country
+# This function retries up to 3 times in case of failure
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def get_google_trends(country):
     try:
+        # Check if the country is in the allowed list, otherwise default to the US
         if country not in COUNTRIES:
             country = 'united_states'
+        
+        # Fetch trending searches for the given country
         trending_searches = pytrends.trending_searches(pn=country)
+        
+        # Convert trends into a list of dictionaries with trend names (and no search volume data)
         return [{"name": trend, "search_volume": None} for trend in trending_searches.values.flatten()]
+    
+    # Handle errors gracefully and return an empty list
     except Exception as e:
         print(f"Error getting Google trends for {country}: {e}")
         return []
 
+# Function to fetch trending posts from Reddit's r/all subreddit
 def get_reddit_trends():
     try:
-        reddit = praw.Reddit(
-            client_id=os.getenv("REDDIT_CLIENT_IDs"),
-            client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
-            user_agent=os.getenv("REDDIT_USER_AGENT")
-        )
-        
-        # trending_subreddits = reddit.trending_subreddits()
-        popular_posts = reddit.subreddit("all").hot(limit=10)
+        # Get the top 50 hot posts from r/all
+        popular_posts = reddit.subreddit("all").hot(limit=50)  # Increased limit for better selection
         
         trends = []
-        # for subreddit in trending_subreddits:
-        #     trends.append({"name": f"r/{subreddit}", "type": "subreddit"})
         
+        # Loop through the posts and filter based on engagement (score and number of comments)
         for post in popular_posts:
-            trends.append({"name": post.title, "type": "post", "score": post.score, "subreddit": post.subreddit.display_name})
+            if post.score < 1000 or post.num_comments < 50:
+                continue
+            
+            # Extract relevant details from each post (e.g., title, score, subreddit, etc.)
+            trend = {
+                "name": post.title[:100],  # Limit the title length to 100 characters
+                "type": "post",
+                "score": post.score,
+                "subreddit": post.subreddit.display_name,
+                "num_comments": post.num_comments,
+                "url": post.url,
+                "is_video": post.is_video,
+                "over_18": post.over_18,  # NSFW indicator
+                "created_utc": post.created_utc  # When the post was created
+            }
+            
+            # Add post flair if available
+            if hasattr(post, 'link_flair_text') and post.link_flair_text:
+                trend["flair"] = post.link_flair_text
+            
+            # Add post content if available, but limit to 500 characters
+            if post.selftext:
+                trend["content"] = post.selftext[:500]
+            
+            # Append the post to the trends list
+            trends.append(trend)
         
-        # Sort trends by score and take top 10
-        trends = sorted(trends, key=lambda x: x['score'], reverse=True)[:5]
-
-        return trends
+        # Sort trends by a combination of score (70% weight) and number of comments (30% weight)
+        trends = sorted(trends, key=lambda x: (x['score'] * 0.7 + x['num_comments'] * 0.3), reverse=True)
+        
+        # Return the top 10 trending posts
+        return trends[:10]
+    
+    # Handle errors gracefully and return an empty list
     except Exception as e:
         print(f"Error getting Reddit trends: {e}")
         return []
 
+# Main function to collect trends from both Google and Reddit, and store the data
 def collect_and_store_trends(country_code):
-    twitter_trends = get_twitter_trends()
+    # Fetch Google and Reddit trends
     google_trends = get_google_trends(country_code)
     reddit_trends = get_reddit_trends()
     
-    if not twitter_trends and not google_trends:
+    # If no trends are found, raise an exception
+    if not google_trends and not reddit_trends:
         raise Exception("No trend data available for the selected country")
     
+    # Combine the trends into a single dictionary with a timestamp
     data = {
         "timestamp": datetime.now().isoformat(),
         "country_code": country_code,
-        "twitter_trends": twitter_trends,
         "google_trends": google_trends,
         "reddit_trends": reddit_trends
     }
     
+    # Save the trends to a JSON file
     with open("trends_data.json", "w") as f:
         json.dump(data, f, indent=2)
     
+    # Print a success message
     print("Trends collected and stored successfully.")
+    
+    # Return the collected data
     return data
 
 if __name__ == "__main__":

@@ -1,53 +1,73 @@
 
-## Trend-Based Newsletter Generator
+## Trend Newsletter Generator
 
-This project is a Flask web application that generates newsletter content based on current trending topics. It combines Twitter and Google Trends data to provide a comprehensive list of trending topics and then utilizes the Gemini Pro model from Google AI to create engaging content for each trend.
+This application collects trending topics from Google Trends and Reddit and generates a customizable newsletter section based on them using Google's Gemini API.
 
 ### Features
 
-* **Trend Collection:**
-    * Collects real-time trending topics from both Twitter and Google Trends for various countries.
-    * Stores the collected trends data in a JSON file for future reference.
-* **Content Generation:**
-    * Generates a newsletter section for the top trends using the Gemini Pro model.
-    * Provides a clear and engaging overview of each trend, including its significance and impact.
-* **Customization:**
-    * Users can select the country and model they want to use for generating content.
-    * Supports a range of Gemini models, including `gemini-pro` and `gemini-1.5-flash`.
-* **Easy Integration:**
-    * The generated content is formatted in HTML, allowing for easy integration into your website or newsletter platform.
-### Requirements
+- **Trend Aggregation:** Pulls trending searches from Google Trends and top posts from Reddit's r/all for a comprehensive view of current trends.
+- **Country-Specific Trends:**  Retrieves Google Trends data for specific countries, allowing users to tailor the newsletter to different regions.
+- **Customizable Newsletter Content:**  Utilizes the Gemini AI model to generate newsletter content. Users can adjust the:
+    - Number of trends to include
+    - Preferred Gemini model 
+    - Keywords to focus on
+    - Overall tone of the writing (Informative, Humorous, Formal, Casual)
+- **Markdown to HTML Conversion:**  The generated newsletter content is formatted using Markdown and then automatically converted to HTML for easy integration into existing platforms.
+- **Error Handling and User Feedback:** Includes error handling mechanisms and user-friendly messages (using Flask's flash messaging) to provide a smooth experience. 
 
-* Python 3.7 or higher
-* Flask
-* Markdown
-* Google Generative AI
-* tweepy
-* pytrends
-* dotenv
-* JSON
+### How It Works
 
-### Installation
+1. **Trend Collection:** The `trend_collector.py` module retrieves:
+    - Top Google search trends for a specific country using the `pytrends` library. 
+    - Hot posts from Reddit's r/all subreddit using the `praw` library, considering post scores and comments for relevancy.
+2. **Trend Storage:** Collected trends are saved to `trends_data.json` with a timestamp for later retrieval. 
+3. **Flask Web Application:** The `app.py` file uses Flask to:
+    - Render a web interface where users can:
+        - Select a country to fetch trends from.
+        - Choose the number of trends to include. 
+        - Specify optional keywords.
+        - Select the desired tone of the newsletter content.
+    - Handle user submissions and call the `generate_newsletter_content` function.
+4. **Newsletter Generation:** The `generate_newsletter_content` function:
+    - Structures a prompt for the Gemini AI model. The prompt includes:
+        - A list of the collected trends
+        - User-specified keywords 
+        - Tone instructions 
+        - Specific formatting requests (headlines, overviews)
+    - Sends the prompt to the Gemini API for content generation.
+    - Converts the generated Markdown response into HTML. 
+5. **Content Display:** The generated HTML content is displayed on the webpage, providing a ready-to-use newsletter section. 
 
-1. Create a virtual environment and activate it.
-2. Install the required dependencies:
+### Setup and Installation
+
+1. **Prerequisites:** Ensure you have Python 3.7 or higher installed. 
+2. **Clone the repository:**
    ```bash
-   pip install -r requirements.txt
+   git clone https://github.com/saman0i0/InkwellTrend
+   cd your-repo 
    ```
-3. Set up your environment variables (refer to the `.env` file example).
-4. Obtain a Gemini Pro API key from Google AI and set the `GEMINI_API_KEY` environment variable.
-5. Set up your Twitter API credentials (refer to the `.env` file example).
-
-### Running the App
-
-1. Run the app using the command:
+3. **Create a Virtual Environment (Recommended):**
    ```bash
-   flask run
+   python3 -m venv venv
+   source venv/bin/activate
    ```
-2. Access the application in your browser at `http://127.0.0.1:5000/`.
+4. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt 
+   ```
+5. **Obtain API Keys:**
+   - **Gemini API Key:**  
+      - Follow instructions at [https://developers.generativeai.google](https://developers.generativeai.google) to obtain an API key and set the `GEMINI_API_KEY` environment variable in your system. 
+   - **Reddit API Credentials:**
+      - Create an app on Reddit's developer platform: [https://www.reddit.com/prefs/apps/](https://www.reddit.com/prefs/apps/)
+      - Get your client ID, client secret, and set up a user agent string. Store these as environment variables: `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, and `REDDIT_USER_AGENT`.
+6. **Run the application:**
+   ```bash
+   flask run 
+   ```
+7. **Access the app in your browser:**  Go to `http://127.0.0.1:5000/`
 
-### Customization
 
-* You can add more Gemini models to the `GEMINI_MODELS` list in `app.py`.
-* Customize the content generation prompt and output format in the `generate_newsletter_content` function in `app.py`.
-* Add more countries to the `COUNTRIES` list in `trend_collector.py`.
+This project uses open-source libraries for trend analysis and content generation and provides a basic but customizable framework for automatically creating engaging newsletter content. 
+### Video Demo
+[screen-capture (1).webm](https://github.com/user-attachments/assets/f5b7f37b-624f-471a-ae85-4d2c821b9842)

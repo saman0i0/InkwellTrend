@@ -1,34 +1,45 @@
+// Wait for the DOM content to load before running the script
 document.addEventListener('DOMContentLoaded', function () {
+
+    // Initialize ClipboardJS for elements with class 'btn'
     var clipboard = new ClipboardJS('.btn');
 
+    // Handle successful copy event
     clipboard.on('success', function (e) {
         console.info('Action:', e.action);
         console.info('Text:', e.text);
         console.info('Trigger:', e.trigger);
 
-        // Optionally clear the selection (it might be distracting for the user) 
         e.clearSelection();
     });
 
+    // Handle copy error event
     clipboard.on('error', function (e) {
         console.error('Action:', e.action);
         console.error('Trigger:', e.trigger);
-        alert("Copy failed! Please select the content and manually copy it.")
+        alert("Copy failed! Please select the content and manually copy it.");
     });
 
+    // Check for 'newsletter' element and show feedback section
     if (document.querySelector('.newsletter')) {
         showFeedback();
-        // Show the "Copy to Clipboard" button as well:
         var copyButton = document.querySelector('.btn');
-        copyButton.style.display = "block"; // or "inline-block", depending on how you want it to be displayed
+        copyButton.style.display = "block";
     }
 });
 
+// Set the source value in an input field
+function setSource(sourceValue) {
+    document.getElementById('source').value = sourceValue;
+}
+
+// Display the feedback section
 function showFeedback() {
     var feedbackDiv = document.getElementById("feedback");
     feedbackDiv.style.display = "block";
 }
 
+// Show a thank-you message after feedback is received
 function feedback(quality) {
     var feedbackDiv = document.getElementById("feedback");
     var thankYouMessage = document.createElement("p");

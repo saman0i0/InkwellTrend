@@ -1,13 +1,14 @@
-
+/* Global styles */
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
     max-width: 100%;
     margin: 0 auto;
-    background-color: #F9F7F0;  /* Off-white for the background  F9F7F0*/
+    background-color: #F9F7F0;  /* Off-white for the background */
     color: #333333; /* Dark blue for the text */
 }
 
+/* Container for centering content */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -15,23 +16,30 @@ body {
     align-items: center;
 }
 
+/* Container for main content */
 .content-container{
     max-width: 80%;
     margin: 0 auto;
-    /* padding:20px 0 20px 0; */
+    outline: 2px solid #ccc;
+    padding: 20px;       
 }
 
+/* Header styles */
 header {
-    background-color: #178ca4; /* Teal for header  #18B7BE 8CBDB9 */
+    background-color: #178ca4; /* Teal for header */
     padding: 20px 0;
     text-align: center;
+    margin-bottom: 15px;
 }
+
+/* Info text in header */
 .infos p{
     text-decoration: none;
     font-size: 1.5em;
     color: #fff;
 }
 
+/* Logo styles */
 .logo {
     display: inline-block;
     font-size: 2em;
@@ -40,6 +48,7 @@ header {
     color: #fff; /* White for logo text */
 }
 
+/* Heading styles */
 h1, h2 {
     margin: 0 auto;
     font-weight: normal;
@@ -57,49 +66,38 @@ h2 {
 }
 
 h3 {
-    color: #333333; ; 
+    color: #333333;
     font-weight: bold;
     font-size: 1.3em;
     display: inline-block;
 }
+
+/* Paragraph styles */
 p {
     margin: 10px 0;
     font-size: 1.1em;
     display: inline-block;
     color: #333333;
 }
-.actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-}
 
-.actions button {
-    background-color:#3498db; /*  Mid-blue for button */
-    color: #fff;
-    padding: 5px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1.2em;
-    transition: background-color 0.3s ease;
-}
-
+/* Hover effect for action buttons */
 .actions button:hover {
     background-color: orangered /* Darker orange on hover */
 }
 
+/* Form styles */
 form {
     margin-bottom: 20px;
 }
 
+/* Custom select wrapper */
 .select-wrapper {
     position: relative;
     width: 100%;
     max-width: 300px;
 }
 
+/* Custom dropdown arrow */
 .select-wrapper::after {
     content: "▼";
     font-size: 1rem;
@@ -110,14 +108,13 @@ form {
     pointer-events: none;
 }
 
+/* Select element styles */
 select {
     appearance: none;
     -webkit-appearance: none;
     width: 100%;
     font-size: 1rem;
     padding: 10px 30px 10px 10px;
-    /* background-color: #1e2030; */
-    /* color: #ffffff; */
     border: 1px solid #3d3d3d;
     border-radius: 4px;
     cursor: pointer;
@@ -128,10 +125,37 @@ select:focus {
     border-color: #4a4a4a;
 }
 
+/* Label styles */
+label { 
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333; 
+}
+
+/* Input and select styles */
+select, input[type="text"] {
+    width: 100%;
+    padding: 10px; 
+    margin-bottom: 5px; 
+    border: 1px solid #ccc;  
+    border-radius: 4px;      
+    box-sizing: border-box;   
+    font-size: 16px;       
+    color: #333;      
+}
+
+/* Focus styles for inputs and selects */
+select:focus, 
+input[type="text"]:focus {
+    outline: none;           
+    border-color: #888;      
+}
+
+/* Button styles */
 button {
-    background-color: #3498db; /*  Mid-blue for button */
+    background-color: #3498db; /* Mid-blue for button */
     color: #fff; 
-    margin-top: 20px;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
@@ -140,16 +164,18 @@ button {
     transition: background-color 0.3s ease;
 }
 
+/* Button hover effect */
 button:hover {
     background-color: #2980b9; /* Darker blue on hover */
 }
 
+/* Flash message styles */
 .flashes {
     list-style: none;
     padding: 0;
     margin: 10px 0;
 }
-  
+
 .flash-error {
     background-color: #ffdddd;
     border: 1px solid #ff8888;
@@ -157,7 +183,7 @@ button:hover {
     margin-bottom: 5px; 
     border-radius: 5px;
 }
-  
+
 .flash-success {
     background-color: #ddffdd;
     border: 1px solid #88ff88;
@@ -190,60 +216,60 @@ button:hover {
     line-height: 1.6; 
 }
 
-.newsletter ul, .newsletter ol { 
-    margin-left: 20px; 
-    margin-bottom: 10px; 
+.btn{
+    margin-top: 15px;
 }
-
 footer {
-    background-color: #18B7BE; /* Teal for footer */
+    background-color: #18B7BE;
     padding:20px ;
     text-align: center;
     align-items: center;
     margin-top: 20px;
 }
 
+/* Support link in footer */
 .support-link {
     text-decoration: none;
-    color: #fff; /* White for support link */
-    /* color: #F9F7F0 #18B7BE #178CA4 #072A40; */
+    color: #fff; 
     font-size: 1.1em;
 }
 
-/* Add these rules to your styles.css file */
-
+/* Feedback section styles */
 #feedback {
     display: none;
-    background-color: #f8f8f8;  /* Light grey background */
-    border: 1px solid #ddd;      /* Subtle grey border */
-    padding: 20px;             /* Some padding inside */
-    border-radius: 5px;         /* Rounded corners */
+    background-color: #f8f8f8;  
+    border: 1px solid #ddd;    
+    padding: 20px;             
+    border-radius: 5px;       
     margin-top: 20px;
   }
   
-  #feedback p {
-    font-weight: bold;        /* Make the question text stand out */
-    margin-bottom: 10px;       /* Add spacing below the question */
-  }
+#feedback p {
+    font-weight: bold;     
+    margin-bottom: 10px;      
+}
   
-  #feedback button {
-    background-color: #4CAF50; /* Green for "Good" button */
-    color: white;              /* White text */
-    padding: 10px 20px;        /* Some button padding */
-    border: none;             /* No button border */
-    border-radius: 5px;         /* Rounded corners */
-    margin: 0 5px;            /* Spacing between the buttons */
-    cursor: pointer;            /* Change the mouse cursor on hover */
-  }
+#feedback button {
+    background-color: #4CAF50; 
+    color: white;              
+    padding: 10px 20px;
+    border: none;             
+    border-radius: 5px;       
+    margin: 0 5px;            
+    cursor: pointer;            
+}
   
-  #feedback button:hover {
-    opacity: 0.8;           /* Slightly darker on hover */
-  }
-  
-  #feedback button:first-child { /* Style for the "Good" button */
-    background-color: #4CAF50; /* Green */
-  }
-  
-#feedback button:last-child { /* Style for the "Bad" button */
-    background-color: #f44336; /* Red  */
+/* Hover effect for feedback buttons */
+#feedback button:hover {
+    opacity: 0.8;
+}
+
+/* First feedback button (Good) styling */
+#feedback button:first-child {
+    background-color: #4CAF50;
+}
+
+/* Last feedback button (Bad) styling */
+#feedback button:last-child {
+    background-color: #f44336;
 }
